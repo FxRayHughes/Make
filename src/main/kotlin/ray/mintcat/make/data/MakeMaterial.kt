@@ -1,12 +1,13 @@
 package ray.mintcat.make.data
 
 import github.saukiya.sxitem.data.item.ItemManager
-import io.lumine.xikage.mythicmobs.MythicMobs
+import ink.ptms.um.Mythic
 import kotlinx.serialization.Serializable
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import ray.mintcat.make.data.MakeMaterialType.*
+import taboolib.library.xseries.parseToXMaterial
 import taboolib.platform.util.*
 
 @Serializable
@@ -20,11 +21,11 @@ class MakeMaterial(
     fun back(player: Player) {
         val item = when (type) {
             MINECRAFT -> {
-                buildItem(Material.valueOf(id))
+                buildItem(id.parseToXMaterial())
             }
 
             MYTHIC -> {
-                MythicMobs.inst().itemManager.getItemStack(id)
+                Mythic.API.getItemStack(id) ?: ItemStack(Material.BARRIER)
             }
 
             SXITEM -> {
@@ -45,7 +46,7 @@ class MakeMaterial(
             }
 
             MYTHIC -> {
-                MythicMobs.inst().itemManager.getItemStack(id)
+                Mythic.API.getItemStack(id) ?: ItemStack(Material.BARRIER)
             }
 
             SXITEM -> {
@@ -74,32 +75,26 @@ class MakeMaterial(
     }
 
     fun getAmount(player: Player): Int {
-        var i = 0
-        player.inventory.takeItem(999) {
-            if (when (type) {
-                    MINECRAFT -> {
-                        it.type.name.equals(id, true)
-                    }
+        return player.inventory.countItem {
+            when (type) {
+                MINECRAFT -> {
+                    it.type.name.equals(id, true)
+                }
 
-                    MYTHIC -> {
-                        MythicMobs.inst().itemManager.getItemStack(id) == it
-                    }
+                MYTHIC -> {
+                    (Mythic.API.getItemId(it) ?: "null") == id
+                }
 
-                    SXITEM -> {
-                        val manager = ItemManager().getGenerator(it)
-                        if (manager != null) {
-                            manager.key == id
-                        } else {
-                            false
-                        }
+                SXITEM -> {
+                    val manager = ItemManager().getGenerator(it)
+                    if (manager != null) {
+                        manager.key == id
+                    } else {
+                        false
                     }
                 }
-            ) {
-                i += it.amount
             }
-            false
         }
-        return i
     }
 
     fun takeItem(player: Player) {
@@ -110,7 +105,7 @@ class MakeMaterial(
                 }
 
                 MYTHIC -> {
-                    MythicMobs.inst().itemManager.getItemStack(id) == it
+                    (Mythic.API.getItemId(it) ?: "null") == id
                 }
 
                 SXITEM -> {
@@ -133,7 +128,7 @@ class MakeMaterial(
                 }
 
                 MYTHIC -> {
-                    MythicMobs.inst().itemManager.getItemStack(id) == it
+                    (Mythic.API.getItemId(it) ?: "null") == id
                 }
 
                 SXITEM -> {

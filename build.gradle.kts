@@ -18,7 +18,7 @@ taboolib {
     install("expansion-command-helper")
     install("platform-bukkit")
     classifier = null
-    version = "6.0.9-11"
+    version = "6.0.9-45"
 }
 
 repositories {
@@ -30,6 +30,8 @@ repositories {
 
 dependencies {
     compileOnly("ink.ptms.core:v11200:11200")
+    //这是mm 4 5兼容器
+    taboo("ink.ptms:um:1.0.0-beta-14")
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
     compileOnly(kotlin("stdlib"))
     compileOnly(fileTree("libs"))

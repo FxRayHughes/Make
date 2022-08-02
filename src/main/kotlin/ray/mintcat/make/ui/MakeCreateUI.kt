@@ -1,8 +1,8 @@
 package ray.mintcat.make.ui
 
 import github.saukiya.sxitem.SXItem
-import io.lumine.xikage.mythicmobs.MythicMobs
-import io.lumine.xikage.mythicmobs.items.MythicItem
+import ink.ptms.um.Item
+import ink.ptms.um.Mythic
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -112,9 +112,13 @@ object MakeCreateUI {
             }
 
             set('B', buildItem(XMaterial.NETHER_STAR) {
-                name = "&d继承其他配方"
+                name = "&d继承其他配方(尚未完成)"
+                lore.add("&6源码来自枫溪星球")
                 colored()
-            })
+            }) {
+                it.isCancelled = true
+                player.error("尚未完成")
+            }
             set('C', buildItem(XMaterial.ITEM_FRAME) {
                 name = "&f类型: ${builder.type}"
                 lore.add(" ")
@@ -335,7 +339,7 @@ object MakeCreateUI {
             slots(inventoryCenterSlots)
             elements {
                 val list = mutableListOf<Material>()
-                list.addAll(Material.values().toList().filter { it.isItem && it.isNotAir() && it.canUse() })
+                list.addAll(Material.values().toList().filter { it.isNotAir() && it.canUse() })
                 list.sortBy { it.name }
                 list
             }
@@ -389,18 +393,15 @@ object MakeCreateUI {
     }
 
     fun addMM(player: Player, builder: MakeStack, type: Type = Type.REPLACE) {
-        player.openMenu<Linked<MythicItem>>("添加材料: MM") {
+        player.openMenu<Linked<Item>>("添加材料: MM") {
             rows(6)
             inits()
             slots(inventoryCenterSlots)
             elements {
-                val list = mutableListOf<MythicItem>()
-                list.addAll(MythicMobs.inst().itemManager.items.toList())
-                list.sortBy { it.internalName }
-                list
+                Mythic.API.getItemList()
             }
             onGenerate { player, element, index, slot ->
-                return@onGenerate MythicMobs.inst().itemManager.getItemStack(element.internalName).clone().apply {
+                return@onGenerate element.generateItemStack(1).apply {
                     modifyLore {
                         add("")
                         if (type == Type.ITEM) {
